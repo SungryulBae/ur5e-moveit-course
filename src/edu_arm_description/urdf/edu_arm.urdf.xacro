@@ -1,0 +1,256 @@
+<?xml version="1.0"?>
+<!--
+  edu_arm: Day1 교육용 6축 로봇 + 평행 그리퍼
+
+  - 관절 배치는 UR5e 공식 DH 파라미터를 그대로 따른다.
+    각 링크 좌표계 = DH 좌표계 {i} 이므로, DH로 계산한 FK와 TF(base_link -> tool0)가 정확히 일치한다.
+  - 관절 i의 origin = (이전 링크의 DH 변환) = Trans(a, 0, d) * RotX(alpha)
+  - 형상은 원기둥/박스로 단순화했다 (실제 UR5e 외형과 다름).
+-->
+<robot name="edu_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ros2_control 하드웨어: mock(기본) / gazebo / mujoco(6교시) -->
+  <xacro:arg name="sim_mode" default="mock"/>
+
+  <!-- UR5e DH 파라미터 (단위 m, rad) -->
+  <xacro:property name="d1" value="0.1625"/>
+  <xacro:property name="a2" value="-0.425"/>
+  <xacro:property name="a3" value="-0.3922"/>
+  <xacro:property name="d4" value="0.1333"/>
+  <xacro:property name="d5" value="0.0997"/>
+  <xacro:property name="d6" value="0.0996"/>
+
+  <!-- UR5e 관절 한계 (ur_description config/ur5e/joint_limits.yaml 과 동일)
+       출처: Universal Robots UR5e User Manual (v5.8), UR 기술 문서 "Max. joint torques"
+       - 위치: 모든 관절 ±360°, 단 elbow_joint 는 ±180°
+         (실제로는 더 돌지만 상완에 막혀 ±180° 이상 쓸 수 없고, 계획 공간이 둘로 나뉘는 문제를 막기 위해 ROS 에서 제한)
+       - 속도: 모든 관절 180°/s (= 3.14 rad/s)
+       - 토크: 어깨 · 팔꿈치 150 Nm, 손목 28 Nm
+       - 가속도: 제조사 미공개 -->
+  <xacro:property name="big_joint_effort" value="150.0"/>
+  <xacro:property name="wrist_joint_effort" value="28.0"/>
+  <xacro:property name="joint_velocity" value="${pi}"/>
+
+  <material name="blue"><color rgba="0.20 0.45 0.80 1.0"/></material>
+  <material name="grey"><color rgba="0.70 0.70 0.70 1.0"/></material>
+  <material name="dark"><color rgba="0.25 0.25 0.25 1.0"/></material>
+
+  <!-- 원기둥 링크 (visual + collision + inertial) -->
+  <xacro:macro name="cyl" params="radius length xyz rpy material">
+    <visual>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+      <material name="${material}"/>
+    </visual>
+    <collision>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+    </collision>
+  </xacro:macro>
+
+  <xacro:macro name="inertia" params="mass xyz">
+    <inertial>
+      <origin xyz="${xyz}" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="arm_joint" params="name parent child xyz rpy lower upper effort">
+    <joint name="${name}" type="revolute">
+      <parent link="${parent}"/>
+      <child link="${child}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${lower}" upper="${upper}" effort="${effort}" velocity="${joint_velocity}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ============ 링크 ============ -->
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
+
+  <!-- {0}: 베이스 -->
+  <link name="base_link">
+    <xacro:cyl radius="0.08" length="0.06" xyz="0 0 0.03" rpy="0 0 0" material="dark"/>
+    <xacro:inertia mass="4.0" xyz="0 0 0.03"/>
+  </link>
+
+  <!-- {1}: 어깨 기둥 (base -> shoulder, 높이 d1) -->
+  <link name="shoulder_link">
+    <xacro:cyl radius="0.06" length="${d1 - 0.06}" xyz="0 0 ${(d1 + 0.06) / 2}" rpy="0 0 0" material="blue"/>
+    <xacro:inertia mass="3.7" xyz="0 0 ${d1 / 2}"/>
+  </link>
+
+  <!-- {2}: 상완 (-x 방향으로 |a2|) -->
+  <link name="upper_arm_link">
+    <xacro:cyl radius="0.06" length="0.14" xyz="0 0 0" rpy="0 0 0" material="grey"/>
+    <xacro:cyl radius="0.045" length="${-a2}" xyz="${a2 / 2} 0 0" rpy="0 ${pi / 2} 0" material="blue"/>
+    <xacro:inertia mass="8.4" xyz="${a2 / 2} 0 0"/>
+  </link>
+
+  <!-- {3}: 전완 (-x 방향으로 |a3|) -->
+  <link name="forearm_link">
+    <xacro:cyl radius="0.05" length="0.12" xyz="0 0 0" rpy="0 0 0" material="grey"/>
+    <xacro:cyl radius="0.038" length="${-a3}" xyz="${a3 / 2} 0 0" rpy="0 ${pi / 2} 0" material="blue"/>
+    <xacro:inertia mass="2.3" xyz="${a3 / 2} 0 0"/>
+  </link>
+
+  <!-- {4}: 손목1 (z 방향으로 d4) -->
+  <link name="wrist_1_link">
+    <xacro:cyl radius="0.04" length="${d4}" xyz="0 0 ${d4 / 2}" rpy="0 0 0" material="grey"/>
+    <xacro:inertia mass="1.2" xyz="0 0 ${d4 / 2}"/>
+  </link>
+
+  <!-- {5}: 손목2 (z 방향으로 d5) -->
+  <link name="wrist_2_link">
+    <xacro:cyl radius="0.04" length="${d5}" xyz="0 0 ${d5 / 2}" rpy="0 0 0" material="blue"/>
+    <xacro:inertia mass="1.2" xyz="0 0 ${d5 / 2}"/>
+  </link>
+
+  <!-- {6}: 손목3 / 플랜지 (z 방향으로 d6) -->
+  <link name="wrist_3_link">
+    <xacro:cyl radius="0.04" length="${d6}" xyz="0 0 ${d6 / 2}" rpy="0 0 0" material="grey"/>
+    <xacro:inertia mass="0.2" xyz="0 0 ${d6 / 2}"/>
+  </link>
+
+  <!-- 툴 플랜지 좌표계 (DH 끝단) -->
+  <link name="tool0"/>
+
+  <!-- ============ 관절 (UR5e DH) ============ -->
+  <!-- joint i 의 origin = 링크 {i-1}의 DH 변환: Trans(a_{i-1}, 0, d_{i-1}) * RotX(alpha_{i-1}) -->
+  <xacro:arm_joint name="shoulder_pan_joint"  parent="base_link"      child="shoulder_link"
+                   xyz="0 0 0"         rpy="0 0 0"          lower="${-2 * pi}" upper="${2 * pi}"
+                   effort="${big_joint_effort}"/>
+  <xacro:arm_joint name="shoulder_lift_joint" parent="shoulder_link"  child="upper_arm_link"
+                   xyz="0 0 ${d1}"     rpy="${pi / 2} 0 0"  lower="${-2 * pi}" upper="${2 * pi}"
+                   effort="${big_joint_effort}"/>
+  <xacro:arm_joint name="elbow_joint"         parent="upper_arm_link" child="forearm_link"
+                   xyz="${a2} 0 0"     rpy="0 0 0"          lower="${-pi}"     upper="${pi}"
+                   effort="${big_joint_effort}"/>
+  <xacro:arm_joint name="wrist_1_joint"       parent="forearm_link"   child="wrist_1_link"
+                   xyz="${a3} 0 0"     rpy="0 0 0"          lower="${-2 * pi}" upper="${2 * pi}"
+                   effort="${wrist_joint_effort}"/>
+  <xacro:arm_joint name="wrist_2_joint"       parent="wrist_1_link"   child="wrist_2_link"
+                   xyz="0 0 ${d4}"     rpy="${pi / 2} 0 0"  lower="${-2 * pi}" upper="${2 * pi}"
+                   effort="${wrist_joint_effort}"/>
+  <xacro:arm_joint name="wrist_3_joint"       parent="wrist_2_link"   child="wrist_3_link"
+                   xyz="0 0 ${d5}"     rpy="${-pi / 2} 0 0" lower="${-2 * pi}" upper="${2 * pi}"
+                   effort="${wrist_joint_effort}"/>
+
+  <joint name="tool0_joint" type="fixed">
+    <parent link="wrist_3_link"/>
+    <child link="tool0"/>
+    <origin xyz="0 0 ${d6}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============ 평행 그리퍼 ============ -->
+  <!-- 손가락은 tool0의 y축 방향으로 움직인다. 0.0 = 열림(명령값), 0.04 = 완전 닫힘
+       하한을 0.0이 아닌 -0.005로 둔 이유: Gazebo(DART)에서 관절이 한계값에 정확히 닿으면
+       속도 명령으로 다시 떨어지지 못하고 붙어 버린다 → 열림 명령(0.0)이 한계 안쪽이 되도록 여유를 둔다 -->
+  <link name="gripper_base">
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry><box size="0.05 0.12 0.04"/></geometry>
+      <material name="dark"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry><box size="0.05 0.12 0.04"/></geometry>
+    </collision>
+    <xacro:inertia mass="0.5" xyz="0 0 0.02"/>
+  </link>
+  <joint name="gripper_base_joint" type="fixed">
+    <parent link="tool0"/>
+    <child link="gripper_base"/>
+  </joint>
+
+  <xacro:macro name="finger" params="side sign">
+    <link name="${side}_finger">
+      <visual>
+        <origin xyz="0 0 0.035" rpy="0 0 0"/>
+        <geometry><box size="0.02 0.01 0.07"/></geometry>
+        <material name="grey"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.035" rpy="0 0 0"/>
+        <geometry><box size="0.02 0.01 0.07"/></geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0.035" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="2.1e-5" ixy="0" ixz="0" iyy="2.2e-5" iyz="0" izz="2.1e-6"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+  <xacro:finger side="left" sign="1"/>
+  <xacro:finger side="right" sign="-1"/>
+
+  <joint name="left_finger_joint" type="prismatic">
+    <parent link="gripper_base"/>
+    <child link="left_finger"/>
+    <origin xyz="0 0.05 0.04" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="-0.005" upper="0.04" effort="100.0" velocity="0.1"/>
+  </joint>
+  <joint name="right_finger_joint" type="prismatic">
+    <parent link="gripper_base"/>
+    <child link="right_finger"/>
+    <origin xyz="0 -0.05 0.04" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.005" upper="0.04" effort="100.0" velocity="0.1"/>
+    <mimic joint="left_finger_joint" multiplier="1" offset="0"/>
+  </joint>
+
+  <!-- 그리퍼 중심점 (물체를 잡는 위치) -->
+  <link name="tcp"/>
+  <joint name="tcp_joint" type="fixed">
+    <parent link="tool0"/>
+    <child link="tcp"/>
+    <origin xyz="0 0 0.10" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============ ros2_control ============ -->
+  <xacro:macro name="ctrl_joint" params="name initial">
+    <joint name="${name}">
+      <command_interface name="position"/>
+      <state_interface name="position"><param name="initial_value">${initial}</param></state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+
+  <ros2_control name="edu_arm_system" type="system">
+    <hardware>
+      <xacro:if value="${'$(arg sim_mode)' == 'mock'}">
+        <plugin>mock_components/GenericSystem</plugin>
+      </xacro:if>
+      <xacro:if value="${'$(arg sim_mode)' == 'gazebo'}">
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </xacro:if>
+      <xacro:if value="${'$(arg sim_mode)' == 'mujoco'}">
+        <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+      </xacro:if>
+    </hardware>
+    <!-- 초기 자세: 팔을 접은 ready 자세 -->
+    <xacro:ctrl_joint name="shoulder_pan_joint"  initial="0.0"/>
+    <xacro:ctrl_joint name="shoulder_lift_joint" initial="-1.5708"/>
+    <xacro:ctrl_joint name="elbow_joint"         initial="1.5708"/>
+    <xacro:ctrl_joint name="wrist_1_joint"       initial="-1.5708"/>
+    <xacro:ctrl_joint name="wrist_2_joint"       initial="-1.5708"/>
+    <xacro:ctrl_joint name="wrist_3_joint"       initial="0.0"/>
+    <xacro:ctrl_joint name="left_finger_joint"   initial="0.0"/>
+  </ros2_control>
+
+  <!-- ============ Gazebo (sim_mode:=gazebo) ============ -->
+  <xacro:if value="${'$(arg sim_mode)' == 'gazebo'}">
+    <gazebo>
+      <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(find edu_arm_description)/config/ros2_controllers.yaml</parameters>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+
+</robot>

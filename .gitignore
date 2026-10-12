@@ -1,0 +1,18 @@
+# colcon
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 생성 파일
+edu_arm_generated.xml
+
+# 강사 전용 (이 PC와 노션에만 보관, GitHub 에 올리지 않음)
+instructor/
+CLAUDE.md
+*.pdf
+.ros_domain_id
