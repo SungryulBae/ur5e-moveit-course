@@ -10,14 +10,14 @@
 
 ## 설치 (처음 한 번)
 ```bash
-git clone https://github.com/SungryulBae/ur5e-moveit-course.git ~/ur5e-moveit-course
-cd ~/ur5e-moveit-course
+git clone https://github.com/SungryulBae/ur5e-moveit-course.git ~/ur5e_course_ws   # 폴더 이름: ur5e_course_ws
+cd ~/ur5e_course_ws
 bash setup/install.sh          # ROS 패키지(sudo) + MuJoCo · PyTorch + 로봇 모델 + 빌드, 10~20분
 ```
 
 ## 터미널을 열 때마다
 ```bash
-source ~/ur5e-moveit-course/scripts/activate.sh <내 번호>   # 예) ... activate.sh 12
+source ~/ur5e_course_ws/scripts/activate.sh <내 번호>   # 예) ... activate.sh 12
 ```
 - `<내 번호>`는 강사가 알려 주는 번호입니다. 한 번 입력하면 기억하므로, 다음부터는 번호 없이 `source .../activate.sh`만 해도 됩니다
 - **모든 터미널에서** 실행해야 합니다. 안 하면 프로그램끼리 서로를 찾지 못합니다
@@ -49,7 +49,7 @@ source ~/ur5e-moveit-course/scripts/activate.sh <내 번호>   # 예) ... activa
 
 ## 폴더 구성
 ```
-ur5e-moveit-course/
+ur5e_course_ws/
 ├── day1/                      1일차 교시별 실습 안내
 ├── day2/                      2일차 교시별 실습 안내
 ├── scripts/activate.sh        환경 활성화

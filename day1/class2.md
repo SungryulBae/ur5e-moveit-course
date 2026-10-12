@@ -18,7 +18,7 @@
 ## 실습 1. 로봇 모델과 좌표계 보기
 ```bash
 # 터미널 1
-source ~/ur5e-moveit-course/scripts/activate.sh
+source ~/ur5e_course_ws/scripts/activate.sh
 ros2 launch edu_arm_description display.launch.py
 ```
 - RViz(3D 화면)와 슬라이더 창이 뜹니다
@@ -45,7 +45,7 @@ ros2 launch edu_arm_description control.launch.py
 
 터미널 2에서 하나씩 입력하고 결과를 보세요.
 ```bash
-source ~/ur5e-moveit-course/scripts/activate.sh
+source ~/ur5e_course_ws/scripts/activate.sh
 ros2 node list                          # 떠 있는 프로그램들 (슬라이더 노드가 없다!)
 ros2 control list_controllers           # 컨트롤러 3개가 active
 ros2 control list_hardware_interfaces   # [claimed] = 이 관절은 컨트롤러가 담당 중
@@ -64,7 +64,7 @@ ros2 run day1_examples c2_joint_state_listener
 ## 실습 4. 관절 움직이기 (액션) + 끝단 위치 보기 (TF)
 ```bash
 # 터미널 3
-source ~/ur5e-moveit-course/scripts/activate.sh
+source ~/ur5e_course_ws/scripts/activate.sh
 ros2 run day1_examples c2_joint_commander                       # 정해진 자세 4개를 차례로
 ros2 run day1_examples c2_joint_commander 30 -90 90 -90 -90 0   # 원하는 각도(도)로
 ```

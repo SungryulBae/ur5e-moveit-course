@@ -36,7 +36,7 @@
 | 3 | `c5_ur_status` | 켜 둠 (상태 계속 출력) |
 | 4 | `c5_ur_move`, `c5_ur_io` | 차례로 |
 
-모든 터미널에서 먼저 `source ~/ur5e-moveit-course/scripts/activate.sh`
+모든 터미널에서 먼저 `source ~/ur5e_course_ws/scripts/activate.sh`
 
 ## 실습 1. 가상 UR5e 띄우기
 ```bash

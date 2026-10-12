@@ -43,7 +43,7 @@
 | 2 | `ros2 run day1_examples c3_dh_fk` | 켜 둠 (1초마다 출력) |
 | 3 | 명령 입력용 | |
 
-모든 터미널에서 먼저 `source ~/ur5e-moveit-course/scripts/activate.sh`
+모든 터미널에서 먼저 `source ~/ur5e_course_ws/scripts/activate.sh`
 
 ## 실습 1. 내가 계산한 FK = ROS의 TF ?
 ```bash

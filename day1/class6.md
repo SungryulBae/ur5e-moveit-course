@@ -23,7 +23,7 @@
 | 1 | `ros2 launch edu_arm_moveit_config demo.launch.py sim:=mujoco` | MoveIt + RViz + MuJoCo 창, 켜 둠 |
 | 2 | 예제 코드를 차례로 | |
 
-모든 터미널에서 먼저 `source ~/ur5e-moveit-course/scripts/activate.sh`
+모든 터미널에서 먼저 `source ~/ur5e_course_ws/scripts/activate.sh`
 - MuJoCo를 직접 쓰는 스크립트는 `$MUJOCO_PYTHON`(설치 때 만든 MuJoCo 전용 파이썬)으로 실행합니다
 
 ## 실습 1. URDF → MuJoCo 모델

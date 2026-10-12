@@ -6,7 +6,7 @@
 | `액션 서버가 없습니다`, `move_group 이 없습니다` | ① 터미널 1의 launch를 실행했는지 ② **그 터미널에서도** `activate.sh`를 실행했는지 (`echo $ROS_DOMAIN_ID`로 번호가 같은지 확인) |
 | 로봇이 혼자 튀거나 이상하게 움직임, RViz 로봇 모델이 Error | 이전 실습의 프로그램이 남아 있음 → 모든 터미널 Ctrl+C → `ros2 node list`가 비었는지 확인 → 다시 실행 |
 | `ros2 node list`에 이미 끈 노드가 보임 | 정보가 늦게 갱신된 것 → `ros2 daemon stop` 후 다시 확인 |
-| `Package 'day1_examples' not found` | 빌드 안 됨 → `cd ~/ur5e-moveit-course && colcon build --symlink-install` 후 `activate.sh` 다시 실행 |
+| `Package 'day1_examples' not found` | 빌드 안 됨 → `cd ~/ur5e_course_ws && colcon build --symlink-install` 후 `activate.sh` 다시 실행 |
 | 로그에 `Could not enable FIFO RT scheduling policy` | 무시해도 됩니다 (실시간 우선순위 권한이 없다는 안내) |
 
 ## 4교시 (MoveIt)

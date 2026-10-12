@@ -28,7 +28,7 @@
 ## 실습 1. RViz에서 마우스로 계획하고 실행하기
 ```bash
 # 터미널 1
-source ~/ur5e-moveit-course/scripts/activate.sh
+source ~/ur5e_course_ws/scripts/activate.sh
 ros2 launch edu_arm_moveit_config demo.launch.py
 ```
 - 왼쪽 MotionPlanning 패널 → Planning Group: `arm`
@@ -41,7 +41,7 @@ ros2 launch edu_arm_moveit_config demo.launch.py
 ## 실습 2. 코드로 목표 자세 주기
 ```bash
 # 터미널 2
-source ~/ur5e-moveit-course/scripts/activate.sh
+source ~/ur5e_course_ws/scripts/activate.sh
 ros2 run day1_examples c4_pose_goal
 ```
 - 준비 자세 → 앞쪽 아래 → 왼쪽 → **팔이 닿지 않는 곳(일부러 실패)** → 준비 자세
