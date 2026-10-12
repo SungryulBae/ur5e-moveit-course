@@ -34,6 +34,7 @@
 ## 2일차 (강화학습)
 | 증상 | 원인 · 해결 |
 |---|---|
+| `-m: command not found` | `$MUJOCO_PYTHON`이 비어 있음 (가상환경 `.venv` 없음) → `bash setup/install.sh --skip-apt` 후 `activate.sh` 다시 실행 |
 | `No module named 'torch'` / `'gymnasium'` | `$MUJOCO_PYTHON`이 아닌 파이썬으로 실행함. `activate.sh` 실행 후 `$MUJOCO_PYTHON -m ...`으로 |
 | `MuJoCo Menagerie 를 찾을 수 없습니다` | 로봇 모델 다운로드가 안 됨 → `bash setup/install.sh --skip-apt` 다시 실행 (인터넷 필요) |
 | 카메라 이미지 생성 시 OpenGL / EGL 오류 | 화면이 없는 원격 환경에서는 렌더링이 안 될 수 있음 → 화면이 있는 PC에서 실행 |

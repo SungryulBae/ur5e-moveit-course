@@ -15,7 +15,7 @@ source ~/ur5e-moveit-course/scripts/activate.sh
 mkdir -p ~/day2_work && cd ~/day2_work     # 실습 결과(그림 · 데이터 · 학습 결과)가 여기에 저장됩니다
 ```
 - 2일차 코드는 ROS 없이 파이썬으로 바로 실행합니다: `$MUJOCO_PYTHON -m day2_rl.<예제 이름>`
-- `$MUJOCO_PYTHON`은 설치 때 만든 가상환경의 파이썬(MuJoCo · PyTorch 포함)입니다. 비어 있으면 `activate.sh`를 실행하지 않은 것입니다
+- `$MUJOCO_PYTHON`은 설치 때 만든 가상환경의 파이썬(MuJoCo · PyTorch 포함)입니다. 비어 있으면 `activate.sh`를 실행하지 않았거나 가상환경이 없는 것입니다 → `bash ~/ur5e-moveit-course/setup/install.sh --skip-apt`
 - 모든 학습은 **GPU 없이 CPU로** 몇 분 안에 끝나도록 작게 만들었습니다
 
 ## 로봇과 장면
