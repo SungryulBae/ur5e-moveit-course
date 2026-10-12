@@ -30,3 +30,13 @@
 | `No module named 'mujoco'` | `python3`가 아니라 `$MUJOCO_PYTHON`으로 실행. 값이 비어 있으면 `setup/install.sh`를 다시 실행 |
 | MuJoCo 창이 안 뜸 | 화면이 없는 원격 환경 → `sim:=mujoco mj_viewer:=false`로 실행하고 RViz로 확인 |
 | 명령이 두 번 실행되거나 로봇이 튐 | 브리지가 두 개 떠 있음 (이전 실행이 남음) → 모두 끄고 다시 |
+
+## 2일차 (강화학습)
+| 증상 | 원인 · 해결 |
+|---|---|
+| `No module named 'torch'` / `'gymnasium'` | `$MUJOCO_PYTHON`이 아닌 파이썬으로 실행함. `activate.sh` 실행 후 `$MUJOCO_PYTHON -m ...`으로 |
+| `MuJoCo Menagerie 를 찾을 수 없습니다` | 로봇 모델 다운로드가 안 됨 → `bash setup/install.sh --skip-apt` 다시 실행 (인터넷 필요) |
+| 카메라 이미지 생성 시 OpenGL / EGL 오류 | 화면이 없는 원격 환경에서는 렌더링이 안 될 수 있음 → 화면이 있는 PC에서 실행 |
+| 그림 파일(.png)이 안 보임 | 실행한 폴더(`~/day2_work`)에 저장됨 → `xdg-open c1_samples.png` |
+| 학습이 매우 느림 | 다른 학습이 동시에 많이 돌고 있지 않은지 확인. 학습 하나가 CPU 4개를 사용 |
+| 결과가 강의 자료 표와 다름 | 강화학습은 실행마다 결과가 다름. `--seed`를 바꿔 여러 번 돌려 평균을 보기 |

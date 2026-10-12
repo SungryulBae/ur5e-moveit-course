@@ -16,3 +16,12 @@ instructor/
 CLAUDE.md
 *.pdf
 .ros_domain_id
+
+# 설치 스크립트가 내려받는 MuJoCo 로봇 모델
+third_party/
+
+# 2일차 실습 결과물 (실습 폴더에서 생성)
+results/
+*.npz
+*.png
+MUJOCO_LOG.TXT

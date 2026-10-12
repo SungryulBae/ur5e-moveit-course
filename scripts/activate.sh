@@ -27,9 +27,15 @@ else
   echo "[주의] 아직 빌드 전입니다: cd ${_ws} && colcon build --symlink-install"
 fi
 
-# 6교시 MuJoCo: 설치 스크립트가 만든 가상환경의 파이썬
+# 실습 폴더 위치 (2일차 코드가 MuJoCo 로봇 모델을 찾을 때 사용)
+export COURSE_WS="${_ws}"
+
+# MuJoCo · PyTorch 가 설치된 가상환경의 파이썬 (1일차 6교시, 2일차)
 if [ -x "${_ws}/.venv/bin/python" ]; then
   export MUJOCO_PYTHON="${_ws}/.venv/bin/python"
+else
+  unset MUJOCO_PYTHON
+  echo "[주의] MuJoCo 가상환경이 없습니다 (\$MUJOCO_PYTHON 비어 있음): bash ${_ws}/setup/install.sh --skip-apt"
 fi
 
 echo "실습 환경 활성화: ${_ws} (ROS_DOMAIN_ID=${ROS_DOMAIN_ID})"
